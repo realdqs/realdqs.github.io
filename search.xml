@@ -4,8 +4,118 @@
   
     
     <entry>
+      <title><![CDATA[记录一次Caffe训练的debug过程]]></title>
+      <url>http://realdqs.xyz/2016/08/23/a-caffe-debug/</url>
+      <content type="html"><![CDATA[<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><ol>
+<li>训练时loss相对之前的经验而言应该是一个比较满意的结果。</li>
+<li>训练中测试的数据准确率显示亦较高，而实际显示出来的图像，预测出的结果偏差到姥姥家。简而言之可以算作过拟合的情况。</li>
+</ol>
+<h3 id="debug过程"><a href="#debug过程" class="headerlink" title="debug过程"></a>debug过程</h3><ul>
+<li>首先尝试各种更改learn_rate，decay_weight等参数，各种训练并没有得到一个比较满意的结果。</li>
+<li>其次判断为loss层显示可能出问题，因此选择打印每个channel的结果。<ul>
+<li>打印每个chananel的数据结果，保存到文件中，共19个channel，代码段如下</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span>(<span class="keyword">int</span> item_id = <span class="number">0</span>; item_id &lt; <span class="keyword">this</span>-&gt;batch_num_; item_id++) &#123;</div><div class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> kpn = <span class="number">0</span>; kpn &lt; <span class="keyword">this</span>-&gt;heat_channels_; kpn++) &#123;</div><div class="line">      <span class="comment">// Initliaze</span></div><div class="line">      part_max_val = Dtype(-FLT_MAX);</div><div class="line">      max_val_idx = <span class="number">0</span>;</div><div class="line"></div><div class="line">      <span class="keyword">for</span>(<span class="keyword">int</span> hn = <span class="number">0</span>; hn &lt; <span class="keyword">this</span>-&gt;heat_num_; hn++) &#123;</div><div class="line">             <span class="comment">// print all the results in a file</span></div><div class="line">        <span class="keyword">if</span>(item_id==<span class="number">1</span>)&#123;</div><div class="line">            <span class="keyword">char</span>* str;</div><div class="line">            str=<span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">40</span>];</div><div class="line">            <span class="built_in">sprintf</span>(str,<span class="string">"./channel/channel%d.txt"</span>,kpn);</div><div class="line">            ofstream outstuf;</div><div class="line">            outstuf.open(str,ios::app);</div><div class="line">            <span class="keyword">delete</span>[] str;</div><div class="line">            outstuf&lt;&lt; heat_map_ptr[heat_map_offset]&lt;&lt;<span class="string">"\t"</span>;</div><div class="line">           <span class="comment">// outstuf&lt;&lt;endl;</span></div><div class="line">            outstuf.close() ;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>打印出的loss层结果全体与挑出的最大值之间并无差异，考虑为bottom中的ground_truth出现问题<ul>
+<li>打印出pose_heap_map_loss中的bottom[0]，可以参考对应的prototxt层次描述，找出来结果为conv9与heat_maps</li>
+<li>打印部分代码段如下</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//  print some ground truth for inspection</span></div><div class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> h=<span class="number">0</span>;h&lt;bottom[<span class="number">0</span>]-&gt;height(); h++)&#123;</div><div class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> w=<span class="number">0</span>;w&lt;bottom[<span class="number">0</span>]-&gt;width();w++)&#123;</div><div class="line">       <span class="built_in">cout</span> &lt;&lt; <span class="string">"btm[0]"</span> &lt;&lt; bottom[<span class="number">0</span>]-&gt;data_at(<span class="number">0</span>,<span class="number">0</span>,h,w)&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">       <span class="built_in">cout</span> &lt;&lt; <span class="string">"btm[1]"</span> &lt;&lt; bottom[<span class="number">1</span>]-&gt;data_at(<span class="number">0</span>,<span class="number">0</span>,h,w)&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//print heat_maps</span></div><div class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> h=<span class="number">0</span>;h&lt;top[<span class="number">0</span>]-&gt;height(); h++)&#123;</div><div class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> w=<span class="number">0</span>;w&lt;top[<span class="number">0</span>]-&gt;width();w++)&#123;</div><div class="line">     <span class="built_in">cout</span> &lt;&lt; <span class="string">"top[0]-dataat(1,1,h,w)"</span> &lt;&lt; top[<span class="number">0</span>]-&gt;data_at(<span class="number">1</span>,<span class="number">1</span>,h,w)&lt;&lt;<span class="built_in">endl</span>;</div><div class="line"><span class="comment">//      cout &lt;&lt; "top[0]-width" &lt;&lt; top[0]-&gt;width()&lt;&lt;endl;</span></div><div class="line"><span class="comment">//      cout &lt;&lt; "top[0]-num" &lt;&lt; top[0]-&gt;num()&lt;&lt;endl;</span></div><div class="line"><span class="comment">//      cout &lt;&lt; "top[0]-height" &lt;&lt; top[0]-&gt;height()&lt;&lt;endl;</span></div><div class="line"><span class="comment">//      cout &lt;&lt; "top[0]-channels" &lt;&lt; top[0]-&gt;channels()&lt;&lt;endl;</span></div><div class="line">      <span class="built_in">cout</span> &lt;&lt; <span class="string">"top[0]-dataat(1,1,h,w)"</span> &lt;&lt; top[<span class="number">0</span>]-&gt;data_at(<span class="number">0</span>,<span class="number">0</span>,h,w)&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>两者均无问题，做出valid_dist_factor出问题的推测，因为之前在去掉deconv层数时valid_dist_factor参数未做调整，因而可能对应出现问题。</li>
+<li>本质上来说实际上是有数据库中的图片产生heatmap过程中出现问题，valid_dist_factor参数影响的是在数据库图片上应用高斯分布的范围， valid_dist_factor*heat_map_a结果即为对应正方块的长度，越大时范围越大，对应于1即中间位置附近的像素点值的下降速度越快。对于训练过程中的预测结果来说并无改变，但在实际图片上而言，仅有少数点未出现偏差，其余部分均出现较大偏离。</li>
+</ul>
+<p>原valid_dist_factor较大时</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">0.2</th>
+<th style="text-align:center">0.3</th>
+<th style="text-align:center">0.4</th>
+<th></th>
+<th style="text-align:center">0.83</th>
+<th style="text-align:center">0.95</th>
+<th style="text-align:center">0.8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0.5</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0.5</td>
+<td></td>
+<td style="text-align:center">0.99</td>
+<td style="text-align:center">1.2</td>
+<td style="text-align:center">0.98</td>
+</tr>
+<tr>
+<td style="text-align:center">0.4</td>
+<td style="text-align:center">0.3</td>
+<td style="text-align:center">0.2</td>
+<td></td>
+<td style="text-align:center">0.84</td>
+<td style="text-align:center">0.95</td>
+<td style="text-align:center">0.87</td>
+</tr>
+</tbody>
+</table>
+<p>现valid_dist_factor较小时</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">0.8</th>
+<th style="text-align:center">0.9</th>
+<th style="text-align:center">0.8</th>
+<th></th>
+<th style="text-align:center">0.83</th>
+<th style="text-align:center">0.95</th>
+<th style="text-align:center">0.8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0.95</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0.95</td>
+<td></td>
+<td style="text-align:center">0.99</td>
+<td style="text-align:center">1.2</td>
+<td style="text-align:center">0.98</td>
+</tr>
+<tr>
+<td style="text-align:center">0.8</td>
+<td style="text-align:center">0.9</td>
+<td style="text-align:center">0.8</td>
+<td></td>
+<td style="text-align:center">0.84</td>
+<td style="text-align:center">0.95</td>
+<td style="text-align:center">0.87</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+    </entry>
+    
+    <entry>
+      <title><![CDATA[某些卷积参数的相关关系及在caffe训练时的取值]]></title>
+      <url>http://realdqs.xyz/2016/08/23/something-about-convolution/</url>
+      <content type="html"><![CDATA[<p>$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}-1 $$<br>常用kernalsize=5，pad=2，stride不填，默认为1</p>
+<h3 id="1-stride-1时"><a href="#1-stride-1时" class="headerlink" title="1. stride=1时"></a>1. stride=1时</h3><p> $$ ksz=pad*2+1 $$</p>
+<h3 id="2-sride变动时"><a href="#2-sride变动时" class="headerlink" title="2. sride变动时"></a>2. sride变动时</h3><p>根据现有的目的可以增加stride值，例如由2变为3，则根据上述公式可以得到</p>
+<p>$$ \dfrac{h_i+2pad-kernalsize} {strde} = \dfrac{h_i+2pad_1-kernalsize_1}{strde_1} $$</p>
+<p>求解出新旧pad，kernalsize之间的关系</p>
+]]></content>
+    </entry>
+    
+    <entry>
       <title><![CDATA[东瀛旅行与圣地巡礼|其一]]></title>
-      <url>http://realdqs.xyz/2016/08/20/trip_in_japan_1/</url>
+      <url>http://realdqs.xyz/2016/08/20/trip-in-japan-1/</url>
       <content type="html"><![CDATA[<p>要说的话这大概是一个长篇了，不定期更新中，由于7月份的时候就已经在日本结束了毕业旅游，然而各种懒得动笔，所以干脆坑掉了。</p>
 <h3 id="出行之前"><a href="#出行之前" class="headerlink" title="出行之前"></a>出行之前</h3><p>考上研究生后便开始策划这次旅行，最初的计划是三人的旅行，由于预算问题两位初中好友只能放弃，中途经母上安利，表哥加入行程。多亏了表哥，整个行程增加了相当多的乐趣。</p>
 <table>
