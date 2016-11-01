@@ -1244,9 +1244,9 @@ debug过程
       
         
           
-          $$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}-1 $$常用kernalsize=5，pad=2，stride不填，默认为1
-1. stride=1时 $$ ksz=pad*2+1 $$
-2. sride变动时根据现有的目的可以增加stride值，例如由2变
+          $$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}+1 $$常用kernalsize=5，pad=2，stride不填，默认为1
+1. stride=1时若要使前后图片大小保持不变则有 $$ ksz=pad*2+1 $$
+2. sride变动时根据现有的目的可以
           ...
 
           <div class="post-more-link text-center">

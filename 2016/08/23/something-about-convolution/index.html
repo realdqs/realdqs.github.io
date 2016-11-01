@@ -104,25 +104,25 @@
 
 
 
-<meta name="description" content="$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}-1 $$常用kernalsize=5，pad=2，stride不填，默认为1
-1. stride=1时 $$ ksz=pad*2+1 $$
+<meta name="description" content="$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}+1 $$常用kernalsize=5，pad=2，stride不填，默认为1
+1. stride=1时若要使前后图片大小保持不变则有 $$ ksz=pad*2+1 $$
 2. sride变动时根据现有的目的可以增加stride值，例如由2变为3，则根据上述公式可以得到
-$$ \dfrac{h_i+2pad-kernalsize} {str">
+$$ \dfrac{h_i+2pad-k">
 <meta property="og:type" content="article">
 <meta property="og:title" content="某些卷积参数的相关关系及在caffe训练时的取值">
 <meta property="og:url" content="http://realdqs.xyz/2016/08/23/something-about-convolution/index.html">
 <meta property="og:site_name" content="dqs's secret base">
-<meta property="og:description" content="$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}-1 $$常用kernalsize=5，pad=2，stride不填，默认为1
-1. stride=1时 $$ ksz=pad*2+1 $$
+<meta property="og:description" content="$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}+1 $$常用kernalsize=5，pad=2，stride不填，默认为1
+1. stride=1时若要使前后图片大小保持不变则有 $$ ksz=pad*2+1 $$
 2. sride变动时根据现有的目的可以增加stride值，例如由2变为3，则根据上述公式可以得到
-$$ \dfrac{h_i+2pad-kernalsize} {str">
-<meta property="og:updated_time" content="2016-08-22T17:09:35.016Z">
+$$ \dfrac{h_i+2pad-k">
+<meta property="og:updated_time" content="2016-11-01T07:41:59.452Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="某些卷积参数的相关关系及在caffe训练时的取值">
-<meta name="twitter:description" content="$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}-1 $$常用kernalsize=5，pad=2，stride不填，默认为1
-1. stride=1时 $$ ksz=pad*2+1 $$
+<meta name="twitter:description" content="$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}+1 $$常用kernalsize=5，pad=2，stride不填，默认为1
+1. stride=1时若要使前后图片大小保持不变则有 $$ ksz=pad*2+1 $$
 2. sride变动时根据现有的目的可以增加stride值，例如由2变为3，则根据上述公式可以得到
-$$ \dfrac{h_i+2pad-kernalsize} {str">
+$$ \dfrac{h_i+2pad-k">
 
 
 
@@ -370,8 +370,8 @@ $$ \dfrac{h_i+2pad-kernalsize} {str">
       
 
       
-        <p>$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}-1 $$<br>常用kernalsize=5，pad=2，stride不填，默认为1</p>
-<h3 id="1-stride-1时"><a href="#1-stride-1时" class="headerlink" title="1. stride=1时"></a>1. stride=1时</h3><p> $$ ksz=pad*2+1 $$</p>
+        <p>$$ h_o= \dfrac{h_i+2*pad-kernalsize}{stride}+1 $$<br>常用kernalsize=5，pad=2，stride不填，默认为1</p>
+<h3 id="1-stride-1时"><a href="#1-stride-1时" class="headerlink" title="1. stride=1时"></a>1. stride=1时</h3><p>若要使前后图片大小保持不变<br>则有<br> $$ ksz=pad*2+1 $$</p>
 <h3 id="2-sride变动时"><a href="#2-sride变动时" class="headerlink" title="2. sride变动时"></a>2. sride变动时</h3><p>根据现有的目的可以增加stride值，例如由2变为3，则根据上述公式可以得到</p>
 <p>$$ \dfrac{h_i+2pad-kernalsize} {strde} = \dfrac{h_i+2pad_1-kernalsize_1}{strde_1} $$</p>
 <p>求解出新旧pad，kernalsize之间的关系</p>
